@@ -18,10 +18,6 @@ int main(void)
     else{ //O código neste trecho será executado no processo pai
         printf("pid do pai:%d e pid do filho:%d\n",getpid(),pid); //é possível pegar o pid do pai e do filho no processo do pai
     }
-
-    int status = -1;
-    waitpid(pid, &status, WEXITED); //garante que o pai não dê exit antes de saber o valor de retorno do filho
-
-    printf("O filho retornou o codigo %d\n", status);
+    wait(NULL); //garante que o pai não dê exit antes de saber o valor de retorno do filho
     exit(1);
 }
