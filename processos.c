@@ -10,7 +10,7 @@ int main(void)
     pid=fork();
     if(pid<0){ //se o fork retornar negativo, houve um erro
         perror("fork");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     else if(pid==0){ //se o fork retornar 0, significa que essa parte do código será executado no processo do filho
         printf("pid do filho:%d e pid do pai:%d\n",getpid(),getppid()); //é possível pegar o pid do pai e do filho no processo do filho
@@ -23,5 +23,5 @@ int main(void)
     waitpid(pid, &status, WEXITED); //garante que o pai não dê exit antes de saber o valor de retorno do filho
 
     printf("O filho retornou o codigo %d\n", status);
-    exit(EXIT_SUCCESS);
+    exit(1);
 }
