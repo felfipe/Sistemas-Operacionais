@@ -43,6 +43,10 @@ double** multiplica_matriz(double** matrix1, double** matrix2){
   }
   return matrix3;
 }
+/*
+ Este programa gera 2 matrizes aleatórias de ordem TAM e faz a multiplicação delas criando uma terceira matriz.
+ Tudo isso envolve muita conta para a cpu e nenhuma interação de E/S. Logo, podemos considerar este programa como sendo CPU-BOUND.
+*/
 int main(){
   srand(time(NULL));
   double** matriz1 = create_rand_matrix(TAM);
