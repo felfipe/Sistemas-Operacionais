@@ -15,8 +15,10 @@ int main(){
         if(!arquivo2)
             printf("ERRO NA LEITURA");    
         char byte;
-        while(fread(&byte,sizeof(char),1,arquivo1)) // faz a cópia byte por byte
+        while(fread(&byte,sizeof(char),1,arquivo1)){ // faz a cópia byte por byte
+            fseek(arquivo1,4096,SEEK_CUR);
             fwrite(&byte,sizeof(char),1,arquivo2);
+        }
         fclose(arquivo1);
         fclose(arquivo2);
     }

@@ -28,7 +28,7 @@ int main(){
     printf("Tempo para ler do arquivo: %g mS\n", tempo);
 
     inicio = clock(); // ESCREVER NA TELA
-    write(0, &frase, 50); // essa função utiliza a syscall write. O primeiro argumento é o descritor do arquivo ( 0 para out, 1 para input, 2 para stderr).
+    write(0, &frase, 50); // essa função utiliza a syscall write. O primeiro argumento é o descritor do arquivo ( 0 para in, 1 para out, 2 para stderr).
     fim = clock();
     tempo = (fim - inicio)*1000.0/CLOCKS_PER_SEC;
     printf("Tempo gasto na escrita: %g mS\n", tempo);
