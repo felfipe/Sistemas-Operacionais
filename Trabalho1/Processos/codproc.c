@@ -30,6 +30,11 @@ int main(void)
     t_wait=clock();
     wait(NULL); //garante que o pai não dê exit antes de saber o valor de retorno do filho
     t_wait=clock()-t_wait();
-    printf("Tempo de execucao do fork:%lf, tempo de execucao do getpid e getppid:%lf, tempo de execucao do wait:%lf\n",((double)t_fork)/((CLOCKS_PER_SEC / 1000)),((double)t_gp)/((CLOCKS_PER_SEC / 1000)),((double)t_wait)/((CLOCKS_PER_SEC / 1000));
+    if(pid==0){
+        printf("Tempo de execucao do fork:%lf\n",((double)t_fork)/(CLOCKS_PER_SEC / 1000));
+           }
+    if(pid>0){
+        printf("Tempo de execucao do getpid e getppid:%lf\nTempo de execucao do wait:%lf\n",((double)t_gp)/(CLOCKS_PER_SEC / 1000),((double)t_wait)/(CLOCKS_PER_SEC / 1000));
+    }
     exit(1);
 }
