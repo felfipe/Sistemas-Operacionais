@@ -32,7 +32,7 @@ int main(){
     fim = clock();
     tempo = (fim - inicio)*1000.0/CLOCKS_PER_SEC;
     printf("Tempo gasto na escrita: %g mS\n", tempo);
-
+    close(file_descriptor);
 
     return 0;
 }
