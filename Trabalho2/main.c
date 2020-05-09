@@ -22,9 +22,10 @@ função produtora de informação executada em uma thread que acessa um buffer 
 */
 void * produtor(void *arg){
     while(1){
+        usleep(100000*(rand()%10+1));
         pthread_mutex_lock(&semaforo_buffer); // Início da região crítica
         int item = rand()%10 + 1;
-        if(qtd_itens_buffer >= TAM_BUFFER){ // Se não houver mais espaços para inserir, dorme e acorda consumidor.
+        if(qtd_itens_buffer >= TAM_BUFFER){ // Se não houver mais espaços para inserir, dorme e acorda consumidor
             printf("[produtor] : buffer cheio, indo dormir. \n");
             pthread_cond_signal(&status_consumidor);
             pthread_cond_wait(&status_produtor,&semaforo_buffer);
@@ -40,11 +41,13 @@ void * produtor(void *arg){
     pthread_exit(NULL);
 }
 
+
 /*
 função consumidora de informação de um buffer compartilhado
 */
 void * consumidor(void *arg){
     while(1){
+        usleep(100000*(rand()%10+1));
         pthread_mutex_lock(&semaforo_buffer); // Início da região crítica
         int item;
         if(qtd_itens_buffer <= 0){ // Se não houver itens para consumir, dorme e acorda produtor
