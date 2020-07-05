@@ -127,8 +127,6 @@ void Gerenciador::swap_out(){
     }else{
         if(clock_pointer == this->memoria_primaria->paginas.end())
             clock_pointer = this->memoria_primaria->paginas.begin();
-        else
-            clock_pointer++;
         while((*clock_pointer)->getR() != 0){
             (*clock_pointer)->setR(0);
             clock_pointer++;
@@ -137,6 +135,9 @@ void Gerenciador::swap_out(){
                 
         }
         p = *clock_pointer;
+        clock_pointer++;
+        if(clock_pointer == this->memoria_primaria->paginas.end())
+            clock_pointer = this->memoria_primaria->paginas.begin();
         memoria_primaria->paginas.remove(p);
         memoria_primaria->espaco_ocupado--;
         pid = p->get_pid();
