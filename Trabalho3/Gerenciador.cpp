@@ -6,8 +6,9 @@ Gerenciador::Gerenciador(int tamanho_primaria, int tamanho_secundaria, int taman
     this->tamanho_pagina = tamanho_pagina;
     this->espaco_ocupado = 0;
     this->tipo = tipo;
-    memoria_primaria = new Memoria(calcula_paginas(tamanho_primaria));
-    memoria_secundaria = new Memoria(calcula_paginas(tamanho_secundaria));
+    this->memoria_primaria = new Memoria(calcula_paginas(tamanho_primaria));
+    this->memoria_secundaria = new Memoria(calcula_paginas(tamanho_secundaria));
+    this->clock_pointer = this->memoria_primaria->paginas.begin();
     std::cout << "[INFO] MMU instanciada." << std::endl;
     std::cout << "[INFO] Memória principal: " << tamanho_primaria << " KB" << std::endl;
     std::cout << "[INFO] Memória secundária: " << tamanho_secundaria << " KB" << std::endl;
@@ -29,7 +30,6 @@ int Gerenciador::criar_processo(int pid, int tamanho){
     int qtd_paginas = calcula_paginas(tamanho);
     Processo *p = new Processo(pid, qtd_paginas);
     Processos.push_front(p);
-    
     int pagina = 0;
     while(pagina < qtd_paginas){
         if(memoria_primaria->espaco_ocupado == memoria_primaria->tamanho){
@@ -43,6 +43,8 @@ int Gerenciador::criar_processo(int pid, int tamanho){
         p->tabela[pagina].endereco = endereco_livre;
         p->tabela[pagina].local = 1;
         pagina++;
+        if(clock_pointer == this->memoria_primaria->paginas.end())
+            clock_pointer = this->memoria_primaria->paginas.begin();
     }
     return 0;
         
@@ -123,18 +125,18 @@ void Gerenciador::swap_out(){
         memoria_primaria->espaco_ocupado--;
         pid = p->get_pid();
     }else{
-        while((*clock_pointer)->getR() != 0){
-            (*clock_pointer)->setR(0);
-            if(clock_pointer == this->memoria_primaria->paginas.end())
-                clock_pointer = this->memoria_primaria->paginas.begin();
-            else
-                clock_pointer++;
-        }
-        p = *clock_pointer;
         if(clock_pointer == this->memoria_primaria->paginas.end())
             clock_pointer = this->memoria_primaria->paginas.begin();
         else
             clock_pointer++;
+        while((*clock_pointer)->getR() != 0){
+            (*clock_pointer)->setR(0);
+            clock_pointer++;
+            if(clock_pointer == this->memoria_primaria->paginas.end())
+                clock_pointer = this->memoria_primaria->paginas.begin();
+                
+        }
+        p = *clock_pointer;
         memoria_primaria->paginas.remove(p);
         memoria_primaria->espaco_ocupado--;
         pid = p->get_pid();
