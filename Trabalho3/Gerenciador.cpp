@@ -42,24 +42,34 @@ int Gerenciador::criar_processo(int pid, int tamanho){
 
 int Gerenciador::escrever_processo(int pid, int endereco){
     ler_processo(pid,endereco);
-    return;
+    return 0;
 }
 
 int Gerenciador::ler_processo(int pid, int endereco){
-    int pagina_logica = calcula_paginas(endereco);
+    int pagina_logica = calcula_paginas(endereco) -1;
     Processo* processo = find_process(pid);
     if(processo == NULL){
         std::cout << "[INFO] Erro. Processo " << pid << "não existe." << std::endl;
         return -1;
     }
+    if(pagina_logica >= processo->get_tamanho()){
+        std::cout << "[INFO] Erro, página não encontrada." << std::endl;
+        return -1;
+    }
     int pagina_fisica = processo->tabela[pagina_logica].endereco;
-    if(processo->tabela[pagina_logica].endereco == 0){
-        std::cout << "[INFO] página virtual " << pagina_logica << "não se encontra na memória primária." << std::endl;
+    if(processo->tabela[pagina_logica].endereco == -1){
+        std::cout << "[INFO] página virtual " << pagina_logica << " não se encontra na memória primária." << std::endl;
         swap_out();
         swap_in(pid);
         return 0;
     
     }
+    for(auto it : memoria_primaria->paginas)
+        if(it->get_endereco() == pagina_fisica){
+            memoria_primaria->paginas.remove(it);       // LRU move página referenciada para o início
+            memoria_primaria->paginas.push_front(it);
+        }
+    return 0;
 }
 
 
@@ -98,6 +108,7 @@ void Gerenciador::swap_out(){
     Processo* processo = find_process(pid);
     for(int i = 0; i < processo->get_tamanho(); i++)
         if(processo->tabela[i].endereco == p->get_endereco()){
+            std::cout << "[INFO] swap para o disco na página virtual " << i << " relativa ao processo P" << processo->get_pid() << std::endl; 
             processo->tabela[i].endereco = -1;
             processo->tabela[i].local = 0;
             break;
@@ -108,4 +119,37 @@ void Gerenciador::swap_out(){
     }
     memoria_secundaria->paginas.push_front(p);
     memoria_secundaria->espaco_ocupado++;
+    
+}
+
+void Gerenciador::print_memoria_primaria(){
+    std::system("clear");
+    std::cout << "Tamanho memória principal: " << this->memoria_primaria->get_tamanho()*tamanho_pagina << " KB" << std::endl;
+    std::cout << "Espaço ocupado: " << this->memoria_primaria->get_espaco_ocupado()*tamanho_pagina << " KB" << std::endl << std::endl;
+    for(int i = 0; i < this->memoria_primaria->tamanho; i++)
+        std::cout << i*tamanho_pagina << " KB  ";
+    std::cout << std::endl << std::endl;
+    for(int i = 0; i < this->memoria_primaria->tamanho; i++){
+        for(auto it : this->memoria_primaria->paginas)
+            if(it->get_endereco() == i){
+                std::cout << "P"<< it->get_pid() << "   ";
+                break;
+            }
+        std::cout << " ";
+    }
+        std::cout << std::endl << std::endl << std::endl;
+    return;
+}
+
+void Gerenciador::print_memoria_secundaria(){
+    std::system("clear");
+    std::cout << "Tamanho secundaria: " << this->memoria_secundaria->get_tamanho()*tamanho_pagina << " KB" << std::endl;
+    std::cout << "Espaço ocupado: " << this->memoria_secundaria->get_espaco_ocupado()*tamanho_pagina << " KB" << std::endl << std::endl;
+    for(int i = 0; i < this->memoria_secundaria->tamanho; i++)
+        std::cout << i*tamanho_pagina << " KB  ";
+    std::cout << std::endl << std::endl;
+    for(auto it : this->memoria_secundaria->paginas)
+            std::cout << "P"<< it->get_pid() << "   ";
+    std::cout << std::endl << std::endl << std::endl;
+    return;
 }
