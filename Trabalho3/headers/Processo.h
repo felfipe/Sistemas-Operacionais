@@ -6,7 +6,7 @@ class Processo{
     public:
         struct elemento{
             bool     local; // bit que identifica se a página está na primária ou disco.
-            unsigned endereco;
+            int endereco;
         };
         typedef struct elemento Elemento;
         Elemento *tabela; 

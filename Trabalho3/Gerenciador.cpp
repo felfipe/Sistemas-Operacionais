@@ -35,26 +35,26 @@ int Gerenciador::criar_processo(int pid, int tamanho){
         p->tabela[pagina].endereco = endereco_livre;
         p->tabela[pagina].local = 1;
         pagina++;
-        }
+    }
+    return 0;
         
 };
 
-
-
-
-
-
-
-
-
+int Gerenciador::ler_processo(int pid, int endereco){
+    if(find_process(pid) == NULL){
+        std::cout << "[INFO] Erro. Processo " << pid << "não existe." << std::endl;
+        return -1;
+    }
+    if(endereco )
+}
 
 
 
 int Gerenciador::calcula_paginas(int tamanho){
-    if(tamanho/this->tamanho_pagina != 0)
-        return tamanho/this->tamanho_pagina +1;
+    if(tamanho % this->tamanho_pagina != 0)
+        return (int)tamanho/this->tamanho_pagina +1;
     else
-        return tamanho/this->tamanho_pagina;
+        return (int)tamanho/this->tamanho_pagina;
 };
 
 Processo* Gerenciador::find_process(int pid){
