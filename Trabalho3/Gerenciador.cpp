@@ -40,14 +40,27 @@ int Gerenciador::criar_processo(int pid, int tamanho){
         
 };
 
+int Gerenciador::escrever_processo(int pid, int endereco){
+    ler_processo(pid,endereco);
+    return;
+}
+
 int Gerenciador::ler_processo(int pid, int endereco){
-    if(find_process(pid) == NULL){
+    int pagina_logica = calcula_paginas(endereco);
+    Processo* processo = find_process(pid);
+    if(processo == NULL){
         std::cout << "[INFO] Erro. Processo " << pid << "não existe." << std::endl;
         return -1;
     }
-    if(endereco )
+    int pagina_fisica = processo->tabela[pagina_logica].endereco;
+    if(processo->tabela[pagina_logica].endereco == 0){
+        std::cout << "[INFO] página virtual " << pagina_logica << "não se encontra na memória primária." << std::endl;
+        swap_out();
+        swap_in(pid);
+        return 0;
+    
+    }
 }
-
 
 
 int Gerenciador::calcula_paginas(int tamanho){
@@ -62,6 +75,20 @@ Processo* Gerenciador::find_process(int pid){
         if(it->get_pid() == pid)
             return it;
     return NULL;
+}
+void Gerenciador::swap_in(int pid){
+    for(auto i : this->memoria_secundaria->paginas)
+        if(i->get_pid() == pid){
+            Pagina* p = i;
+            this->memoria_secundaria->paginas.remove(i);
+            this->memoria_secundaria->espaco_ocupado--;
+            p->set_endereco(memoria_primaria->get_endereco_livre());
+            this->memoria_primaria->paginas.push_front(p);
+            this->memoria_primaria->espaco_ocupado++;
+            return;
+        }
+    std::cout << "[INFO] swap_in ERRO, página não encontrada no disco." << std::endl;
+    return;
 }
 void Gerenciador::swap_out(){
     Pagina* p = memoria_primaria->paginas.back();

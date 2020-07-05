@@ -22,5 +22,6 @@ class Gerenciador{
         int IO_func(int pid, int endereco);
         int CPU_func(int pid, int endereco);
         void swap_out();
+        void swap_in(int pid);
 };
 #endif

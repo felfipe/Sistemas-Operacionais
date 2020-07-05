@@ -20,13 +20,13 @@ int main(){
         cin >> endereco;
         switch(operador){
             case 'C':
-            gerenciador->criar_processo(stoi(PID),std::stoi(endereco));
+                gerenciador->criar_processo(stoi(PID),stoi(endereco));
             break;
             case 'R':
-            // read process
+                gerenciador->ler_processo(stoi(PID),stoi(endereco));
             break;
             case 'W':
-            // write process
+                gerenciador->escrever_processo(stoi(PID),stoi(endereco));
             break;
             case 'P':
             // CPU-func
