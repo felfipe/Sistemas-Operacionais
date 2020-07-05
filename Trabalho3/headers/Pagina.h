@@ -13,4 +13,6 @@ class Pagina{
         void set_endereco(int endereco);
         int get_pid();
         int set_pid(int pid);
+        void setR(bool R);
+        bool getR();
 };

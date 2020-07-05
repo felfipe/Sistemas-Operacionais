@@ -59,3 +59,7 @@ bool Memoria::encontra_endereco(int endereco){
             return 1;
     return 0;
 }
+Memoria::~Memoria(){
+    for(auto it : this->paginas)
+        delete it;
+}

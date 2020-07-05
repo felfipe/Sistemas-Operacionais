@@ -9,6 +9,7 @@ class Memoria{
         bool encontra_endereco(int endereco);
     public:
         Memoria(int tamanho);
+        ~Memoria();
         int tamanho;        // tamanho em paginas
         int espaco_ocupado; // espaco em paginas
         std::list<Pagina*> paginas;

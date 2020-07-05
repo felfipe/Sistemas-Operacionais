@@ -18,5 +18,7 @@ void Processo::set_pid(int pid){
 void Processo::set_tamanho(int tamanho){
     this->tamanho = tamanho;
 }
-
+Processo::~Processo(){
+    delete[] tabela;
+}
 #endif

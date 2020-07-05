@@ -1,16 +1,24 @@
 #include "headers/Gerenciador.h"
 
-Gerenciador::Gerenciador(int tamanho_primaria, int tamanho_secundaria, int tamanho_pagina){
+Gerenciador::Gerenciador(int tamanho_primaria, int tamanho_secundaria, int tamanho_pagina, bool tipo){
     this->tamanho_primaria = tamanho_primaria;
     this->tamanho_secundaria = tamanho_secundaria;
     this->tamanho_pagina = tamanho_pagina;
     this->espaco_ocupado = 0;
+    this->tipo = tipo;
     memoria_primaria = new Memoria(calcula_paginas(tamanho_primaria));
     memoria_secundaria = new Memoria(calcula_paginas(tamanho_secundaria));
+    std::cout << "[INFO] MMU instanciada." << std::endl;
+    std::cout << "[INFO] Memória principal: " << tamanho_primaria << " KB" << std::endl;
+    std::cout << "[INFO] Memória secundária: " << tamanho_secundaria << " KB" << std::endl;
+    if(tipo == 1)
+        std::cout << "[INFO] Algoritmo de substituição: LRU" << std::endl;
+    else
+        std::cout << "[INFO] Algoritmo de substituição: Relógio " << std::endl;
 };
 
 int Gerenciador::criar_processo(int pid, int tamanho){
-    if(tamanho_primaria + tamanho_secundaria - espaco_ocupado < tamanho){
+    if(tamanho_primaria + tamanho_secundaria - (memoria_primaria->espaco_ocupado + memoria_secundaria->espaco_ocupado +1)*tamanho_pagina < tamanho){
         std::cout << "[INFO] Processo " << pid << " não criado. Espaço insuficiente" << std::endl;
         return -1;
     }
@@ -59,15 +67,20 @@ int Gerenciador::ler_processo(int pid, int endereco){
     int pagina_fisica = processo->tabela[pagina_logica].endereco;
     if(processo->tabela[pagina_logica].endereco == -1){
         std::cout << "[INFO] página virtual " << pagina_logica << " não se encontra na memória primária." << std::endl;
-        swap_out();
+        if(memoria_primaria->espaco_ocupado == memoria_primaria->tamanho) // memoria cheia?
+            swap_out();
         swap_in(pid);
         return 0;
     
     }
     for(auto it : memoria_primaria->paginas)
         if(it->get_endereco() == pagina_fisica){
-            memoria_primaria->paginas.remove(it);       // LRU move página referenciada para o início
-            memoria_primaria->paginas.push_front(it);
+            if(tipo == 1){
+                memoria_primaria->paginas.remove(it);       // LRU move página referenciada para o início
+                memoria_primaria->paginas.push_front(it);
+            }else{
+                it->setR(true);
+            }
         }
     return 0;
 }
@@ -101,14 +114,35 @@ void Gerenciador::swap_in(int pid){
     return;
 }
 void Gerenciador::swap_out(){
-    Pagina* p = memoria_primaria->paginas.back();
-    memoria_primaria->paginas.pop_back();
-    memoria_primaria->espaco_ocupado--;
-    int pid = p->get_pid();
-    Processo* processo = find_process(pid);
+    Pagina* p;
+    Processo* processo;
+    int pid;
+    if(tipo == 1){
+        p = memoria_primaria->paginas.back();
+        memoria_primaria->paginas.pop_back();
+        memoria_primaria->espaco_ocupado--;
+        pid = p->get_pid();
+    }else{
+        while((*clock_pointer)->getR() != 0){
+            (*clock_pointer)->setR(0);
+            if(clock_pointer == this->memoria_primaria->paginas.end())
+                clock_pointer = this->memoria_primaria->paginas.begin();
+            else
+                clock_pointer++;
+        }
+        p = *clock_pointer;
+        if(clock_pointer == this->memoria_primaria->paginas.end())
+            clock_pointer = this->memoria_primaria->paginas.begin();
+        else
+            clock_pointer++;
+        memoria_primaria->paginas.remove(p);
+        memoria_primaria->espaco_ocupado--;
+        pid = p->get_pid();
+    }
+    processo = find_process(pid);
     for(int i = 0; i < processo->get_tamanho(); i++)
         if(processo->tabela[i].endereco == p->get_endereco()){
-            std::cout << "[INFO] swap para o disco na página virtual " << i << " relativa ao processo P" << processo->get_pid() << std::endl; 
+            std::cout << "[INFO] swap da ram para o disco na página virtual " << i << " relativa ao processo P" << processo->get_pid() << std::endl; 
             processo->tabela[i].endereco = -1;
             processo->tabela[i].local = 0;
             break;
@@ -119,7 +153,6 @@ void Gerenciador::swap_out(){
     }
     memoria_secundaria->paginas.push_front(p);
     memoria_secundaria->espaco_ocupado++;
-    
 }
 
 void Gerenciador::print_memoria_primaria(){
@@ -152,4 +185,33 @@ void Gerenciador::print_memoria_secundaria(){
             std::cout << "P"<< it->get_pid() << "   ";
     std::cout << std::endl << std::endl << std::endl;
     return;
+}
+
+int Gerenciador::kill_processo(int pid){
+    Processo* p = find_process(pid);
+    if(p == NULL)
+        return -1;
+    delete p;
+    for(auto it : this->memoria_primaria->paginas)
+        if(it->get_pid() == pid){
+            Pagina* pagina = it;
+            it++;
+            this->memoria_primaria->paginas.remove(pagina);
+            this->memoria_primaria->espaco_ocupado--;
+            delete pagina;
+        }
+    for(auto it : this->memoria_secundaria->paginas)
+        if(it->get_pid() == pid){
+            this->memoria_secundaria->paginas.remove(it);
+            this->memoria_secundaria->espaco_ocupado--;
+
+        }
+    return 0;
+}
+
+Gerenciador::~Gerenciador(){
+    delete this->memoria_primaria;
+    delete this->memoria_secundaria;
+    for(auto it : this->Processos)
+        delete it;
 }

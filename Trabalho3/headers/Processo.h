@@ -11,6 +11,7 @@ class Processo{
         typedef struct elemento Elemento;
         Elemento *tabela; 
         Processo(int pid, int tamanho);
+        ~Processo();
         int  get_pid();
         int  get_tamanho();
         void set_pid(int pid);

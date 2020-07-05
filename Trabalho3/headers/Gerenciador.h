@@ -8,6 +8,8 @@ class Gerenciador{
     private:
         std::list<Processo*> Processos;
         int tamanho_primaria, tamanho_secundaria, tamanho_pagina, espaco_ocupado;
+        bool tipo;                      // 0 - clock, 1 - LRU
+        std::list<Pagina*>::iterator clock_pointer;
         Memoria* memoria_primaria;
         Memoria* memoria_secundaria;
         int calcula_paginas(int tamanho);
@@ -15,7 +17,8 @@ class Gerenciador{
         void print_memoria(Memoria* memoria);
 
     public:
-        Gerenciador(int tamanho_primaria, int tamanho_secundaria, int tamanho_pagina);
+        Gerenciador(int tamanho_primaria, int tamanho_secundaria, int tamanho_pagina, bool tipo);
+        ~Gerenciador();
         int criar_processo(int pid, int tamanho);
         int excluir_processo(int pid);
         int ler_processo(int pid, int endereco);
@@ -27,5 +30,6 @@ class Gerenciador{
         void print_memoria_primaria();
         void print_memoria_secundaria();
         void print_tabela_processo(int pid);
+        int kill_processo(int pid);
 };
 #endif
