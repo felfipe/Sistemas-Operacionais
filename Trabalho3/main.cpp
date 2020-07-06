@@ -51,11 +51,15 @@ int main(){
                 gerenciador->print_memoria_secundaria();
             break;
             case 'I':
-            // I/O process
-            break;
-            case 'K':
                 cin >> PID;
-                gerenciador->kill_processo(stoi(PID));
+                cin >> endereco;
+                cout << "Processo " << PID << " acessou o dispositivo "<< endereco << endl;
+            break;
+            case 'U':
+                cin >> PID;
+                cin >> endereco;
+                cout << "Processo " << PID << " executou a instrução "<< endereco << endl;
+            break;
             case 'H':
                 system("clear");
                 cout << "\tC pid size(KB)     - cria um processo (Ex: C 1 7)" << endl;
